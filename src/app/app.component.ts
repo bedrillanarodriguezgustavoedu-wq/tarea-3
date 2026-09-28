@@ -1,93 +1,117 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-type ShippingMethod = 'Land' | 'Air' | 'Sea';
+type DashboardSection = 'Dashboard' | 'Patient list' | 'Reports' | 'Account';
+type AnalyticsTab = 'Overview' | 'Biomarker details' | 'Lung function' | 'Analytics' | 'Risk simulator' | 'Patient history' | 'Notes & orders';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
-  title = 'Cargo';
-  services = [
-    { title: 'Door-to-door delivery', text: 'Reliable pickup, tracking and final delivery managed by one team.' },
-    { title: 'Business logistics', text: 'Flexible freight solutions built around your schedule and budget.' },
-    { title: 'Cargo protection', text: 'Careful handling, transparent updates and optional shipping insurance.' }
+export class AppComponent {
+  title = 'Pulmify';
+  dashboardSections: DashboardSection[] = ['Dashboard', 'Patient list', 'Reports', 'Account'];
+  analyticsTabs: AnalyticsTab[] = [
+    'Overview',
+    'Biomarker details',
+    'Lung function',
+    'Analytics',
+    'Risk simulator',
+    'Patient history',
+    'Notes & orders',
   ];
-  shippingMethods: ShippingMethod[] = ['Land', 'Air', 'Sea'];
-  selectedMethod: ShippingMethod = 'Land';
-  typeOfGoods = 'General Cargo';
-  weight = 250;
-  height = 30;
-  width = 20;
-  length = 18;
-  fromCountry = 'USA';
-  toCountry = 'Mexico';
-  fromCity = 'Chicago';
-  toCity = 'Mexico City';
-  estimatedCost: number | null = null;
-  estimateSubmitted = false;
-  estimateError = '';
-  contactName = '';
-  contactEmail = '';
-  contactMessage = '';
-  contactSubmitted = false;
-  contactError = '';
+  selectedSection: DashboardSection = 'Dashboard';
+  selectedTab: AnalyticsTab = 'Analytics';
+  searchQuery = '';
+  filter = 'All patients';
+  sortBy = 'Popular';
+  environmentalExposure = 20;
+  selectedPatientId = 'PT-2048';
+  demoName = '';
+  demoEmail = '';
+  demoOrganization = '';
+  demoMessage = '';
+  demoRequestPrepared = false;
 
-  ngOnInit(): void {
-    this.calculateEstimate();
+  clinicalNotes = [
+    { title: 'Pulmonary function test scheduled', detail: 'Anna Kim · Oct 02, 2026', status: 'Scheduled' },
+    { title: 'Review elevated IL-6 result', detail: 'Marcus Chen · Care team follow-up', status: 'Needs review' },
+    { title: 'Quarterly biomarker panel received', detail: 'Sofia Patel · Sep 27, 2026', status: 'Complete' },
+  ];
+
+  patients = [
+    { name: 'Anna Kim', id: 'PT-2048', age: 42, status: 'Monitoring', risk: 'Low', marker: 'ALDH-3', updated: 'Today, 9:42 AM' },
+    { name: 'Marcus Chen', id: 'PT-1983', age: 57, status: 'Review needed', risk: 'Elevated', marker: 'IL-6', updated: 'Today, 8:15 AM' },
+    { name: 'Sofia Patel', id: 'PT-1931', age: 36, status: 'Stable', risk: 'Low', marker: 'TNF-α', updated: 'Yesterday' },
+    { name: 'James Wilson', id: 'PT-1882', age: 64, status: 'Monitoring', risk: 'Moderate', marker: 'CRP', updated: 'Yesterday' },
+  ];
+
+  aldehydeBars = [10, 8, 6, 12, 9, 7, 5, 9, 13, 11, 8, 12, 15, 10, 7, 9];
+  currentBars = [88, 83, 69, 91, 58, 55, 48, 64, 79, 74, 61, 69, 82, 77, 65, 73];
+  previousBars = [55, 61, 52, 49, 43, 37, 33, 47, 62, 57, 49, 53, 68, 54, 44, 59];
+
+  get selectedPatient() {
+    return this.patients.find((patient) => patient.id === this.selectedPatientId) ?? this.patients[0];
   }
 
-  get methodRate(): number {
-    switch (this.selectedMethod) {
-      case 'Land':
-        return 2;
-      case 'Air':
-        return 9;
-      case 'Sea':
-        return 2.5;
+  get patientAgeGroup(): string {
+    const lowerBound = Math.floor(this.selectedPatient.age / 10) * 10;
+    return `${lowerBound}–${lowerBound + 9}`;
+  }
+
+  get baselineRiskScore(): number {
+    switch (this.selectedPatient.risk) {
+      case 'Elevated':
+        return 36;
+      case 'Moderate':
+        return 24;
       default:
-        return 0;
+        return 12;
     }
   }
 
-  calculateEstimate(): void {
-    const numericWeight = Number(this.weight) || 0;
-    const numericHeight = Number(this.height) || 0;
-    const numericWidth = Number(this.width) || 0;
-    const numericLength = Number(this.length) || 0;
-
-    if (numericWeight <= 0 || numericHeight <= 0 || numericWidth <= 0 || numericLength <= 0) {
-      this.estimatedCost = null;
-      this.estimateError = 'Enter a weight and dimensions greater than zero.';
-      return;
-    }
-
-    this.estimateError = '';
-    const cubicVolume = (numericHeight * numericWidth * numericLength) / 1728;
-    const volumetricWeight = Math.max(numericWeight, cubicVolume * 10);
-    const countryFactor = this.fromCountry === this.toCountry ? 1 : 1.25;
-    const distanceFactor = this.selectedMethod === 'Air' ? 1.65 : this.selectedMethod === 'Sea' ? 1.25 : 1;
-    const basePrice = this.methodRate * volumetricWeight * countryFactor * distanceFactor;
-
-    this.estimatedCost = Number((basePrice + basePrice * 0.12).toFixed(2));
-    this.estimateSubmitted = true;
+  get elevatedRiskCount(): number {
+    return this.patients.filter((patient) => patient.risk === 'Elevated').length;
   }
 
-  submitContact(): void {
-    const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.contactEmail.trim());
+  get stablePatientCount(): number {
+    return this.patients.filter((patient) => patient.status === 'Stable').length;
+  }
 
-    if (!this.contactName.trim() || !emailIsValid || !this.contactMessage.trim()) {
-      this.contactSubmitted = false;
-      this.contactError = 'Please complete your name, a valid email and your message.';
-      return;
+  get simulatedRiskScore(): number {
+    return Math.min(95, this.baselineRiskScore + Math.round(this.environmentalExposure * 0.3));
+  }
+
+  get demoMailto(): string {
+    const subject = encodeURIComponent(`Pulmify demo request — ${this.demoOrganization.trim()}`);
+    const body = encodeURIComponent(
+      `Name: ${this.demoName.trim()}\nEmail: ${this.demoEmail.trim()}\nOrganization: ${this.demoOrganization.trim()}\n\n${this.demoMessage.trim()}`,
+    );
+    return `mailto:hello@pulmify.com?subject=${subject}&body=${body}`;
+  }
+
+  prepareDemoRequest(): void {
+    this.demoRequestPrepared = true;
+  }
+
+  get filteredPatients() {
+    const query = this.searchQuery.trim().toLowerCase();
+    let results = this.patients.filter((patient) => {
+      const matchesQuery = !query || `${patient.name} ${patient.id} ${patient.marker}`.toLowerCase().includes(query);
+      const matchesFilter = this.filter === 'All patients' || patient.status === this.filter;
+      return matchesQuery && matchesFilter;
+    });
+
+    if (this.sortBy === 'Name') {
+      results = [...results].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (this.sortBy === 'Risk') {
+      const riskOrder = ['Elevated', 'Moderate', 'Low'];
+      results = [...results].sort((a, b) => riskOrder.indexOf(a.risk) - riskOrder.indexOf(b.risk));
     }
 
-    this.contactError = '';
-    this.contactSubmitted = true;
+    return results;
   }
 }

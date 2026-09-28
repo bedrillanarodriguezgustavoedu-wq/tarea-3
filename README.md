@@ -1,71 +1,62 @@
-# CargoTown Landing Page
+# Pulmify
 
-Landing page responsive para una empresa de logística y transporte internacional, desarrollada con Angular y Tailwind CSS.
+Sitio web de Pulmify con dos versiones independientes:
 
-## Descripción
+- Angular y Tailwind CSS en la raíz del repositorio.
+- Laravel 12 y Blade en `pulmify-laravel/`.
 
-Este proyecto recrea una interfaz moderna para una marca de carga y envíos, con secciones como:
-
-- Hero principal
-- Soluciones por transporte
-- Servicios destacados
-- Calculadora de costos
-- Formulario de contacto
-- Preguntas frecuentes
-- Footer institucional
-
-## Tecnologías
-
-- Angular
-- TypeScript
-- Tailwind CSS
-- HTML/CSS
+Ambas versiones funcionan sin una base de datos y usan contenido clínico ficticio de demostración. No uses los puntajes ni ejemplos para tomar decisiones médicas.
 
 ## Requisitos
 
-- Node.js
-- npm
-- Angular CLI
+- Node.js y npm.
+- PHP 8.2 o posterior y Composer para Laravel.
 
-## Instalación
+## Ejecutar la versión Angular
 
-```bash
+Desde la raíz del repositorio:
+
+```powershell
 npm install
-```
-
-## Ejecución
-
-```bash
 npm start
 ```
 
-La aplicación estará disponible en:
+Abre <http://localhost:4200>.
 
-```bash
-http://localhost:4200
+## Ejecutar la versión Laravel
+
+Desde PowerShell:
+
+```powershell
+cd .\pulmify-laravel
+composer install
+Copy-Item .env.example .env
+php artisan key:generate
+npm install
+npm run build
+php artisan serve
 ```
 
-## Compilación para producción
+Abre <http://127.0.0.1:8000>. No ejecutes migraciones; esta versión usa sesiones y caché en archivos y no necesita una base de datos.
 
-```bash
+Para enviar solicitudes del formulario Laravel, configura los valores SMTP y `PULMIFY_CONTACT_EMAIL` en `pulmify-laravel/.env`. El archivo `.env` está excluido de Git: nunca publiques credenciales. Si SMTP no está configurado, el formulario muestra un aviso y no finge que envió el mensaje. Las solicitudes válidas se envían por correo y no se almacenan en una base de datos.
+
+## Pruebas
+
+Angular, desde la raíz:
+
+```powershell
+npm test -- --watch=false
 npm run build
 ```
 
-## Estructura principal
+Laravel, desde `pulmify-laravel`:
 
-```bash
-src/
-  app/
-    app.component.ts
-    app.component.html
-    app.component.css
-  styles.css
+```powershell
+php artisan test
+npm run build
 ```
 
-## Autor
+## Repositorio
 
-Bedri L. / Gustavo
-
-## GitHub
-
-https://github.com/bedrillanarodriguezgustavoedu-wq/tarea2
+<https://github.com/bedrillanarodriguezgustavoedu-wq/tarea-3>
